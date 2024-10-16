@@ -24,6 +24,7 @@ build:
 test:
   stage: test
   script:
+    - chmod +x gradlew
     - ./gradlew test
   only:
     - main
@@ -32,6 +33,7 @@ test:
 deploy:
   stage: deploy
   script:
+    - chmod +x gradlew
     - echo "Deploying to production..."
     - scp build/libs/*.jar user@your-server:/path/to/deploy/
     - ssh user@your-server 'systemctl restart your-service'
