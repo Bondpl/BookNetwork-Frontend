@@ -1,0 +1,33 @@
+stages:
+  - build
+  - test
+  - deploy
+
+before_script:
+  - echo "Using Java version: $(java -version)"
+  - echo "Using Gradle version: $(gradle -v)"
+
+build:
+  stage: build
+  only:
+    - main
+  script:
+    - ./gradlew clean build
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 1 hour
+
+test:
+  stage: test
+  script:
+    - ./gradlew test
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying to production..."
+    - scp build/libs/*.jar user@your-server:/path/to/deploy/
+    - ssh user@your-server 'systemctl restart your-service'
+  only:
+    - main
