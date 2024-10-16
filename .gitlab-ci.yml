@@ -6,14 +6,12 @@ stages:
 image: openjdk:17-slim # Use a Docker image that includes Java
 
 variables:
-  JAVA_HOME: "/usr/lib/jvm/java-17-openjdk" # Set JAVA_HOME for Java 17
-  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle" # Cache Gradle dependencies locally
 
 build:
   stage: build
   only:
     - main
-    - feature/cli
   script:
     - chmod +x gradlew
     - ./gradlew clean build
@@ -24,23 +22,16 @@ build:
 
 test:
   stage: test
-  only:
-    - main
-    - feature/cli
   script:
     - ./gradlew test
+  only:
+    - main
 
 deploy:
   stage: deploy
-  only:
-    - main
-    - feature/cli
   script:
     - echo "Deploying to production..."
     - scp build/libs/*.jar user@your-server:/path/to/deploy/
     - ssh user@your-server 'systemctl restart your-service'
-  artifacts:
-    paths:
-      - build/libs/*.jar
-    expire_in: 1 hour
-
+  only:
+    - main
