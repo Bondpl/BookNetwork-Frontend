@@ -12,6 +12,7 @@ build:
   stage: build
   only:
     - main
+    - feature/cli
   script:
     - chmod +x gradlew
     - ./gradlew clean build
@@ -26,6 +27,7 @@ test:
     - ./gradlew test
   only:
     - main
+    - feature/cli
 
 deploy:
   stage: deploy
@@ -35,3 +37,4 @@ deploy:
     - ssh user@your-server 'systemctl restart your-service'
   only:
     - main
+    - feature/cli
