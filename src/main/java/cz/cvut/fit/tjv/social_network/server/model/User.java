@@ -17,6 +17,11 @@ public class User {
 
     private String email;
 
+    private String password;
+
+    private String description;
+
+    private String profilePictureUrl;
     @Enumerated(EnumType.STRING) // Store role as a String
     private Role role;
 

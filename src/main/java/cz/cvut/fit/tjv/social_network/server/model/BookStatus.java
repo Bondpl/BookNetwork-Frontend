@@ -1,7 +1,6 @@
 package cz.cvut.fit.tjv.social_network.server.model;
 
-public enum Role {
-    ADMIN,
-    USER,
-    BANNED
+public enum BookStatus {
+    AVAILABLE,
+    BORROWED
 }
