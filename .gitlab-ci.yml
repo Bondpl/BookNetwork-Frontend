@@ -9,6 +9,7 @@ build:
     - main
     - feature/cli
   script:
+    - chmod +x gradlew
     - ./gradlew clean build
   artifacts:
     paths:
