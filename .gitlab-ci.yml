@@ -1,7 +1,6 @@
 stages:
   - build
   - test
-  - deploy
 
 image: openjdk:17-slim # Use a Docker image that includes Java
 
@@ -26,17 +25,6 @@ test:
   script:
     - chmod +x gradlew
     - ./gradlew test
-  only:
-    - main
-    - feature/cli
-
-deploy:
-  stage: deploy
-  script:
-    - chmod +x gradlew
-    - echo "Deploying to production..."
-    - scp build/libs/*.jar user@your-server:/path/to/deploy/
-    - ssh user@your-server 'systemctl restart your-service'
   only:
     - main
     - feature/cli
