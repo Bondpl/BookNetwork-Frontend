@@ -7,7 +7,7 @@ build:
   stage: build
   only:
     - main
-    - feature
+    - feature/cli
   script:
     - ./gradlew clean build
   artifacts:
@@ -19,7 +19,7 @@ test:
   stage: test
   only:
     - main
-    - feature
+    - feature/cli
   script:
     - ./gradlew test
 
@@ -27,6 +27,7 @@ deploy:
   stage: deploy
   only:
     - main
+    - feature/cli
   script:
     - echo "Deploying to production..."
     - scp build/libs/*.jar user@your-server:/path/to/deploy/
