@@ -12,14 +12,11 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "borrower_id")
     private Long borrowerID;
 
-    @JoinColumn(name = "lender_id")
     private Long lenderID;
 
     @ManyToOne
-    @JoinColumn(name = "book_id")
     private Book book;
 
     @Enumerated(EnumType.STRING)
@@ -39,6 +36,10 @@ public class Transaction {
 
     public void setLenderID(Long lenderID) {
         this.lenderID = lenderID;
+    }
+
+    public Book getBook() {
+        return book;
     }
 }
 

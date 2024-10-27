@@ -4,28 +4,25 @@ import cz.cvut.fit.tjv.social_network.server.model.*;
 import cz.cvut.fit.tjv.social_network.server.repository.BookRepository;
 import cz.cvut.fit.tjv.social_network.server.repository.TransactionRepository;
 import cz.cvut.fit.tjv.social_network.server.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class BookService {
 
-    @Autowired
     private BookRepository bookRepository;
-
-    @Autowired
     private UserRepository userRepository;
-
-    @Autowired
     private TransactionRepository transactionRepository;
 
-    public Book borrowBook(Long bookId, Long userId){
+    public Book borrowBook(Long bookId, Long userId) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new RuntimeException("Book not found"));
-        if (book.getBookStatus() == BookStatus.BORROWED){
+        if (book.getBookStatus() == BookStatus.BORROWED) {
             throw new RuntimeException("Book is already borrowed");
         }
 
@@ -47,6 +44,10 @@ public class BookService {
         return book;
     }
 
+    public Book createBook(Book book) {
+        return bookRepository.save(book);
+    }
+
     public void removeBook(Long bookId) {
         bookRepository.deleteById(bookId);
     }
@@ -54,7 +55,17 @@ public class BookService {
     public Optional<Book> findBooksByStatus(BookStatus status) {
         return bookRepository.findByBookStatus(status);
     }
-    public List<Book> getAllBooks() {
-        return bookRepository.findAll();
+
+    public Collection<Book> getAllBooks() {
+        Collection<Book> books = bookRepository.findAll();
+        System.out.println(books);
+        return books;
+    }
+
+    public Collection<Book> getBooksBorrowedByUser(Long userId) {
+        Collection<Transaction> transactions = transactionRepository.findByBorrowerID(userId);
+        return transactions.stream()
+                .map(Transaction::getBook)
+                .collect(Collectors.toList());
     }
 }

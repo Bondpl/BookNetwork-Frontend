@@ -1,6 +1,7 @@
 package cz.cvut.fit.tjv.social_network.server.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -13,12 +14,15 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "Title is required")
     private String title;
 
+    @NotNull(message = "Author is required")
     private String author;
 
     private String isbn;
 
+    @NotNull(message = "Title is required")
     @Enumerated(EnumType.STRING)
     private BookStatus bookStatus;
 
@@ -29,8 +33,8 @@ public class Book {
     @OneToMany(mappedBy = "book")
     private List<Transaction> transactions;
 
-    @ManyToOne
-    @JoinColumn(name = "owner_id")
+    @NotNull(message = "Owner is required")
+    @ManyToOne(fetch = FetchType.LAZY)
     private User owner;
 
     public BookStatus getBookStatus() {
