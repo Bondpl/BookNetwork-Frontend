@@ -22,20 +22,20 @@ public class ServerApplication {
 		return "Homepage";
 	}
 
-	@GetMapping("/notfound")
-	public String notFound() {
-		return "<!DOCTYPE html>\n" +
-				"<html lang=\"en\">\n" +
-				"<head>\n" +
-				"    <meta charset=\"UTF-8\">\n" +
-				"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-				"    <title>Error Page</title>\n" +
-				"</head>\n" +
-				"<body>\n" +
-				"<h1>Page Not Found</h1>\n" +
-				"<p>The URL you entered could not be found.</p>\n" +
-				"<a href=\"/\">Go to Homepage</a>\n" +
-				"</body>\n" +
-				"</html>\n";
-	}
+//	@GetMapping("/notfound")
+//	public String notFound() {
+//		return "<!DOCTYPE html>\n" +
+//				"<html lang=\"en\">\n" +
+//				"<head>\n" +
+//				"    <meta charset=\"UTF-8\">\n" +
+//				"    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+//				"    <title>Error Page</title>\n" +
+//				"</head>\n" +
+//				"<body>\n" +
+//				"<h1>Page Not Found</h1>\n" +
+//				"<p>The URL you entered could not be found.</p>\n" +
+//				"<a href=\"/\">Go to Homepage</a>\n" +
+//				"</body>\n" +
+//				"</html>\n";
+//	}
 }

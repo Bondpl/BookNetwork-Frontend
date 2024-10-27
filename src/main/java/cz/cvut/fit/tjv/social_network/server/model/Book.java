@@ -28,4 +28,23 @@ public class Book {
 
     @OneToMany(mappedBy = "book")
     private List<Transaction> transactions;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
+
+    public BookStatus getBookStatus() {
+        return bookStatus;
+    }
+
+    public void setBookStatus(BookStatus bookStatus) {
+        this.bookStatus = bookStatus;
+    }
+
+
+    public Long getId(Long id) {
+        return id;
+    }
+
+
 }
