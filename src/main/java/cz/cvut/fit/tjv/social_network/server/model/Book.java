@@ -34,21 +34,11 @@ public class Book {
     private List<Transaction> transactions;
 
     @NotNull(message = "Owner is required")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private User owner;
-
-    public BookStatus getBookStatus() {
-        return bookStatus;
-    }
-
-    public void setBookStatus(BookStatus bookStatus) {
-        this.bookStatus = bookStatus;
-    }
-
 
     public Long getId(Long id) {
         return id;
     }
-
 
 }
