@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.util.List;
-
 @Entity
 @Data
 @Table(name = "books")
@@ -29,9 +27,6 @@ public class Book {
     private String coverUrl;
 
     private Double averageRating;
-
-    @OneToMany(mappedBy = "book")
-    private List<Transaction> transactions;
 
     @NotNull(message = "Owner is required")
     @ManyToOne(fetch = FetchType.EAGER)

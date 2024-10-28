@@ -19,6 +19,12 @@ public class BookController {
         return bookService.getAllBooks();
     }
 
+    @GetMapping("/{id}")
+    public Collection<Book> getBooksBorrowedByUser(@PathVariable Long id) {
+        return bookService.getBooksBorrowedByUser(id);
+    }
+    
+
     @PostMapping
     public Book createBook(@Valid @RequestBody Book book) {
         return bookService.createBook(book);
