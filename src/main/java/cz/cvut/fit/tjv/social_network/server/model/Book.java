@@ -4,13 +4,15 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Entity
 @Data
 @Table(name = "books")
 public class Book {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID uuid = UUID.randomUUID();
 
     @NotNull(message = "Title is required")
     private String title;
@@ -26,14 +28,8 @@ public class Book {
 
     private String coverUrl;
 
-    private Double averageRating;
-
     @NotNull(message = "Owner is required")
     @ManyToOne(fetch = FetchType.EAGER)
     private User owner;
-
-    public Long getId(Long id) {
-        return id;
-    }
 
 }

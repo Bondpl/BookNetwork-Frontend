@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -16,7 +17,7 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    public void removeTransaction(Long transactionId) {
+    public void removeTransaction(UUID transactionId) {
         transactionRepository.deleteById(transactionId);
     }
 

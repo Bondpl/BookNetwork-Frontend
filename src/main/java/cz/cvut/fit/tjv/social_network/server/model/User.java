@@ -4,14 +4,16 @@ package cz.cvut.fit.tjv.social_network.server.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Entity
 @Data
 @Table(name = "users")
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generates the primary key
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID uuid = UUID.randomUUID();
 
     private String username;
 

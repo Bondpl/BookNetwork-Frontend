@@ -26,7 +26,7 @@ public class UserController {
     }
 
     @PostMapping("/batch")
-    public List<User> createUsers(@Valid @RequestBody List<User> users) {
+    public List<User> createUsers(@RequestBody List<User> users) {
         return userService.createUsers(users);
     }
 }

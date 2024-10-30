@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -22,12 +23,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
+    public User getUserById(UUID uuid) {
+        return userRepository.findById(uuid).orElse(null);
     }
 
     public List<User> createUsers(List<User> users) {
         return userRepository.saveAll(users);
     }
-
 }

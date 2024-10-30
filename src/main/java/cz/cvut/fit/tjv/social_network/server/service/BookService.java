@@ -8,7 +8,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,8 +20,8 @@ public class BookService {
     private UserRepository userRepository;
     private TransactionRepository transactionRepository;
 
-    public Book borrowBook(Long bookId, Long userId) {
-        Book book = bookRepository.findById(bookId)
+    public Book borrowBook(UUID bookUuid, UUID userUuid) {
+        Book book = bookRepository.findById(bookUuid)
                 .orElseThrow(() -> new RuntimeException("Book not found"));
         if (book.getBookStatus() == BookStatus.BORROWED) {
             throw new RuntimeException("Book is already borrowed");
@@ -31,11 +32,13 @@ public class BookService {
 
         Transaction transaction = new Transaction();
         transaction.setBook(book);
-        transaction.setBorrowerID(userId);
-
-        User lender = userRepository.findById(userId)
+        User borrower = userRepository.findById(userUuid)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        transaction.setLenderID(lender.getId());
+        transaction.setBorrower(borrower);
+
+        User lender = userRepository.findById(book.getOwner().getUuid())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        transaction.setLender(lender);
 
 
         transaction.setStatus(TransactionStatus.ONGOING);
@@ -48,11 +51,11 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    public void removeBook(Long bookId) {
-        bookRepository.deleteById(bookId);
+    public void removeBook(UUID bookUuid) {
+        bookRepository.deleteById(bookUuid);
     }
 
-    public Optional<Book> findBooksByStatus(BookStatus status) {
+    public List<Book> findBooksByStatus(BookStatus status) {
         return bookRepository.findByBookStatus(status);
     }
 
@@ -62,8 +65,8 @@ public class BookService {
         return books;
     }
 
-    public Collection<Book> getBooksBorrowedByUser(Long userId) {
-        Collection<Transaction> transactions = transactionRepository.findByBorrowerID(userId);
+    public Collection<Book> getBooksBorrowedByUser(UUID userUuid) {
+        Collection<Transaction> transactions = transactionRepository.findByBorrower_Uuid(userUuid);
         return transactions.stream()
                 .map(Transaction::getBook)
                 .collect(Collectors.toList());

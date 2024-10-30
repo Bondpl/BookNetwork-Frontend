@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/books")
@@ -19,11 +20,11 @@ public class BookController {
         return bookService.getAllBooks();
     }
 
-    @GetMapping("/{id}")
-    public Collection<Book> getBooksBorrowedByUser(@PathVariable Long id) {
-        return bookService.getBooksBorrowedByUser(id);
+    @GetMapping("/{uuid}")
+    public Collection<Book> getBooksBorrowedByUser(@PathVariable UUID uuid) {
+        return bookService.getBooksBorrowedByUser(uuid);
     }
-    
+
 
     @PostMapping
     public Book createBook(@Valid @RequestBody Book book) {

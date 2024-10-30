@@ -4,20 +4,24 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Entity
 @Data
 @Table(name = "transactions")
 public class Transaction {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID uuid = UUID.randomUUID();
 
     @NotNull(message = "Borrower is required")
-    private Long borrowerID;
+    @ManyToOne(fetch = FetchType.EAGER)
+    private User borrower;
 
     @NotNull(message = "Lender is required")
-    private Long lenderID;
+    @ManyToOne(fetch = FetchType.EAGER)
+    private User lender;
 
     @NotNull(message = "Book is required")
     @ManyToOne(fetch = FetchType.EAGER)
