@@ -63,8 +63,7 @@ public class BookService {
 
         bookRepository.deleteById(bookUuid);
     }
-
-
+    
     public Collection<Book> findBooksByStatus(BookStatus status) {
         return bookRepository.getBooksByBookStatus(status);
     }
