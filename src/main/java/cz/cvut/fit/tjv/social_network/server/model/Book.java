@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -31,5 +32,8 @@ public class Book {
     @NotNull(message = "Owner is required")
     @ManyToOne(fetch = FetchType.EAGER)
     private User owner;
+
+    @OneToMany(mappedBy = "book")
+    private List<Rating> ratings;
 
 }
