@@ -11,6 +11,7 @@ build:
   stage: build
   only:
     - main
+    - test-branch
   script:
     - chmod +x gradlew
     - ./gradlew clean build
