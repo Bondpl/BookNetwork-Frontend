@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -33,11 +32,11 @@ public class BookService {
         Transaction transaction = new Transaction();
         transaction.setBook(book);
         User borrower = userRepository.findById(userUuid)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Borrower not found"));
         transaction.setBorrower(borrower);
 
         User lender = userRepository.findById(book.getOwner().getUuid())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Lender not found"));
         transaction.setLender(lender);
 
 
@@ -48,15 +47,26 @@ public class BookService {
     }
 
     public Book createBook(Book book) {
+        if (book.getOwner() == null) {
+            throw new RuntimeException("Owner is required");
+        }
         return bookRepository.save(book);
     }
 
     public void removeBook(UUID bookUuid) {
+        Book book = bookRepository.findById(bookUuid)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        if (book.getBookStatus() == BookStatus.BORROWED) {
+            throw new RuntimeException("Cannot remove a borrowed book");
+        }
+
         bookRepository.deleteById(bookUuid);
     }
 
-    public List<Book> findBooksByStatus(BookStatus status) {
-        return bookRepository.findByBookStatus(status);
+
+    public Collection<Book> findBooksByStatus(BookStatus status) {
+        return bookRepository.getBooksByBookStatus(status);
     }
 
     public Collection<Book> getAllBooks() {
