@@ -1,0 +1,253 @@
+package service;
+
+import cz.cvut.fit.tjv.social_network.server.model.Book;
+import cz.cvut.fit.tjv.social_network.server.model.BookStatus;
+import cz.cvut.fit.tjv.social_network.server.model.Transaction;
+import cz.cvut.fit.tjv.social_network.server.model.User;
+import cz.cvut.fit.tjv.social_network.server.repository.BookRepository;
+import cz.cvut.fit.tjv.social_network.server.repository.TransactionRepository;
+import cz.cvut.fit.tjv.social_network.server.repository.UserRepository;
+import cz.cvut.fit.tjv.social_network.server.service.BookService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+public class BookServiceTest {
+
+    @Mock
+    private BookRepository bookRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private TransactionRepository transactionRepository;
+
+    @InjectMocks
+    private BookService bookService;
+
+    private UUID bookUuid;
+    private UUID userUuid;
+    private Book book;
+    private User user;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        bookUuid = UUID.randomUUID();
+        userUuid = UUID.randomUUID();
+
+        book = new Book();
+        book.setUuid(bookUuid);
+        book.setBookStatus(BookStatus.AVAILABLE);
+
+        user = new User();
+        user.setUuid(userUuid);
+
+        book.setOwner(user);
+    }
+
+    @Test
+    void borrowBook_Success() {
+        when(bookRepository.findById(bookUuid)).thenReturn(Optional.of(book));
+        when(userRepository.findById(userUuid)).thenReturn(Optional.of(user));
+        when(userRepository.findById(book.getOwner().getUuid())).thenReturn(Optional.of(user));  // Mock owner lookup
+
+        Book result = bookService.borrowBook(bookUuid, userUuid);
+
+        assertEquals(BookStatus.BORROWED, result.getBookStatus());
+        verify(transactionRepository, times(1)).save(any(Transaction.class));
+        verify(bookRepository, times(1)).save(book);
+    }
+
+    @Test
+    void borrowBook_BookAlreadyBorrowed() {
+        book.setBookStatus(BookStatus.BORROWED);
+        when(bookRepository.findById(bookUuid)).thenReturn(Optional.of(book));
+
+        try {
+            bookService.borrowBook(bookUuid, userUuid);
+        } catch (RuntimeException e) {
+            assertEquals("Book is already borrowed", e.getMessage());
+        }
+    }
+
+    @Test
+    void borrowBook_BookNotFound() {
+        when(bookRepository.findById(bookUuid)).thenReturn(Optional.empty());
+
+        try {
+            bookService.borrowBook(bookUuid, userUuid);
+        } catch (RuntimeException e) {
+            assertEquals("Book not found", e.getMessage());
+        }
+    }
+
+    @Test
+    void borrowBook_BorrowerNotFound() {
+        when(bookRepository.findById(bookUuid)).thenReturn(Optional.of(book));
+        when(userRepository.findById(userUuid)).thenReturn(Optional.empty());
+        when(userRepository.findById(book.getOwner().getUuid())).thenReturn(Optional.of(user));
+
+        try {
+            bookService.borrowBook(bookUuid, userUuid);
+        } catch (RuntimeException e) {
+            assertEquals("Borrower not found", e.getMessage());
+        }
+    }
+
+    @Test
+    void createBook_Success() {
+        when(bookRepository.save(book)).thenReturn(book);
+
+        Book result = bookService.createBook(book);
+
+        assertEquals(book, result);
+        verify(bookRepository, times(1)).save(book);
+    }
+
+    @Test
+    void CreateBook_NoOwner() {
+        book.setOwner(null);
+
+        assertThrows(RuntimeException.class, () -> bookService.createBook(book));
+    }
+
+    @Test
+    void removeBook_BookAvailable() {
+        when(bookRepository.findById(bookUuid)).thenReturn(Optional.of(book));
+
+        bookService.removeBook(bookUuid);
+
+        verify(bookRepository, times(1)).deleteById(bookUuid);
+    }
+
+    @Test
+    void removeBook_BookLent() {
+        book.setBookStatus(BookStatus.BORROWED);
+        when(bookRepository.findById(bookUuid)).thenReturn(Optional.of(book));
+
+        RuntimeException thrown = assertThrows(
+                RuntimeException.class,
+                () -> bookService.removeBook(bookUuid)
+        );
+
+        assertEquals("Cannot remove a borrowed book", thrown.getMessage());
+        verify(bookRepository, never()).deleteById(bookUuid);
+    }
+
+    @Test
+    void removeBook_BookNotFound() {
+        UUID nonExistentBookUuid = UUID.randomUUID();
+
+        RuntimeException thrown = assertThrows(
+                RuntimeException.class,
+                () -> bookService.removeBook(nonExistentBookUuid)
+        );
+
+        assertEquals("Book not found", thrown.getMessage());
+        verify(bookRepository, never()).deleteById(nonExistentBookUuid);
+    }
+
+    @Test
+    void findBooksByStatus_twoBooks() {
+        BookStatus status = BookStatus.AVAILABLE;
+
+        Book book2 = new Book();
+        book2.setUuid(UUID.randomUUID());
+        book2.setBookStatus(status);
+
+        when(bookRepository.getBooksByBookStatus(status)).thenReturn(List.of(book, book2));
+
+        Collection<Book> result = bookService.findBooksByStatus(status);
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(book));
+        assertTrue(result.contains(book2));
+
+        verify(bookRepository, times(1)).getBooksByBookStatus(status);
+    }
+
+    @Test
+    void findBooksByStatus_NoBooks() {
+        BookStatus status = BookStatus.AVAILABLE;
+
+        when(bookRepository.getBooksByBookStatus(status)).thenReturn(List.of());
+
+        Collection<Book> result = bookService.findBooksByStatus(status);
+
+        assertEquals(0, result.size());
+
+        verify(bookRepository, times(1)).getBooksByBookStatus(status);
+    }
+
+    @Test
+    void getAllBooks_threeBooks() {
+        Book book2 = new Book();
+        Book book3 = new Book();
+        book2.setUuid(UUID.randomUUID());
+        book3.setUuid(UUID.randomUUID());
+
+        when(bookRepository.findAll()).thenReturn(List.of(book, book2, book3));
+
+        Collection<Book> result = bookService.getAllBooks();
+
+        assertEquals(3, result.size());
+        assertTrue(result.contains(book));
+        assertTrue(result.contains(book2));
+        assertTrue(result.contains(book3));
+
+        verify(bookRepository, times(1)).findAll();
+    }
+
+    @Test
+    void getAllBooks_NoBooks() {
+        when(bookRepository.findAll()).thenReturn(List.of());
+
+        Collection<Book> result = bookService.getAllBooks();
+
+        assertEquals(0, result.size());
+
+        verify(bookRepository, times(1)).findAll();
+    }
+
+    @Test
+    void getBooksBorrowedByUser_twoBooks() {
+        Book book2 = new Book();
+        book2.setUuid(UUID.randomUUID());
+        book2.setOwner(user);
+
+        Transaction transaction1 = new Transaction();
+        transaction1.setBook(book);
+        transaction1.setBorrower(user);
+
+        Transaction transaction2 = new Transaction();
+        transaction2.setBook(book2);
+        transaction2.setBorrower(user);
+
+        when(transactionRepository.findByBorrower_Uuid(userUuid)).thenReturn(List.of(transaction1, transaction2));
+
+        Collection<Book> result = bookService.getBooksBorrowedByUser(userUuid);
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(book));
+        assertTrue(result.contains(book2));
+
+        verify(transactionRepository, times(1)).findByBorrower_Uuid(userUuid);
+    }
+
+}
