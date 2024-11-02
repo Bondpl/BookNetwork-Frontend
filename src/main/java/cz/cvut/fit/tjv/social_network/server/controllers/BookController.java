@@ -1,6 +1,7 @@
 package cz.cvut.fit.tjv.social_network.server.controllers;
 
 import cz.cvut.fit.tjv.social_network.server.model.Book;
+import cz.cvut.fit.tjv.social_network.server.model.BookStatus;
 import cz.cvut.fit.tjv.social_network.server.service.BookService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -20,11 +21,15 @@ public class BookController {
         return bookService.getAllBooks();
     }
 
-    @GetMapping("/{uuid}")
+    @GetMapping("/user/{uuid}")
     public Collection<Book> getBooksBorrowedByUser(@PathVariable UUID uuid) {
         return bookService.getBooksBorrowedByUser(uuid);
     }
 
+    @GetMapping("/status/{status}")
+    public Collection<Book> getBooksByStatus(@PathVariable BookStatus status) {
+        return bookService.findBooksByStatus(status);
+    }
 
     @PostMapping
     public Book createBook(@Valid @RequestBody Book book) {
