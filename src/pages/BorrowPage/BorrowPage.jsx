@@ -2,13 +2,19 @@ import React, { useState, useEffect } from "react";
 
 function BorrowReturnPage() {
     const [books, setBooks] = useState([]);
+    const [showHighRated, setShowHighRated] = useState(false);
+    const [ratingThreshold, setRatingThreshold] = useState(4); // Example threshold
+
     useEffect(() => {
         fetchBooks();
-    }, []);
+    }, [showHighRated]);
 
     const fetchBooks = async () => {
         try {
-            const response = await fetch("http://localhost:8080/books", {
+            const endpoint = showHighRated
+                ? `http://localhost:8080/books/ratingGreater`
+                : "http://localhost:8080/books";
+            const response = await fetch(endpoint, {
                 method: "GET",
                 credentials: "include", // Includes session cookies
                 headers: {
@@ -79,6 +85,12 @@ function BorrowReturnPage() {
     return (
         <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">Borrow and Return Books</h1>
+            <button
+                onClick={() => setShowHighRated(!showHighRated)}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 transition mb-4"
+            >
+                {showHighRated ? "Show All Books" : "Show High Rated Books"}
+            </button>
             <ul className="space-y-4">
                 {books.map((book) => (
                     <li

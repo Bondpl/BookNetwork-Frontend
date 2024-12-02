@@ -3,10 +3,8 @@ import React, { useState, useEffect } from 'react';
 const UserPage = () => {
     const [user, setUser] = useState(null);
     const [ownedBooks, setOwnedBooks] = useState([]);
-    const [borrowedBooks, setBorrowedBooks] = useState([]);
-    const [error, setError] = useState(null); // Error state for error messages
+    const [error, setError] = useState(null);
 
-    // Function to fetch authenticated user data
     const fetchAuthenticatedUser = async () => {
         try {
             const response = await fetch('http://localhost:8080/users/self', {
@@ -14,13 +12,13 @@ const UserPage = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                credentials: 'include', // Include session cookie
+                credentials: 'include',
             });
 
             if (response.ok) {
                 const data = await response.json();
-                setUser(data); // Store user data in state
-                await fetchOwnedBooks(); // Fetch owned books
+                setUser(data);
+                await fetchOwnedBooks();
             } else {
                 setError(`Error fetching user data: ${response.status}`);
             }
@@ -31,14 +29,22 @@ const UserPage = () => {
 
     const fetchOwnedBooks = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/books/owned`, {
+            const response = await fetch('http://localhost:8080/books/owned', {
                 method: 'GET',
-                credentials: 'include', // Ensure the session cookie is sent
+                credentials: 'include',
             });
 
             if (response.ok) {
-                const data = await response.json();
-                setOwnedBooks(data);
+                const books = await response.json();
+                console.log('Fetched books:', books); // Debugging line
+                const booksWithTransactions = await Promise.all(
+                    books.map(async (book) => {
+                        console.log('Fetching transactions for book:', book.id); // Debugging line
+                        const transactions = await fetchTransactionsOfBook(book.id);
+                        return { ...book, transactions };
+                    })
+                );
+                setOwnedBooks(booksWithTransactions);
             } else {
                 setError(`Failed to fetch owned books: ${response.status}`);
             }
@@ -47,21 +53,36 @@ const UserPage = () => {
         }
     };
 
+    const fetchTransactionsOfBook = async (bookId) => {
+        try {
+            const response = await fetch(`http://localhost:8080/transactions/book`, {
+                method: 'GET',
+                credentials: 'include',
+            });
 
-    // Use useEffect to call fetchAuthenticatedUser when the component mounts
+            if (response.ok) {
+                return await response.json();
+            } else {
+                setError(`Failed to fetch transactions for book ${bookId}: ${response.status}`);
+                return [];
+            }
+        } catch (error) {
+            setError(`Error fetching transactions for book ${bookId}: ${error.message}`);
+            return [];
+        }
+    };
+
     useEffect(() => {
         fetchAuthenticatedUser();
-    }, []); // Empty dependency array ensures this runs only once on mount
+    }, []);
 
     return (
         <div className="container mx-auto p-4">
             <h2 className="text-2xl font-bold mb-4">User Profile</h2>
-            {error && <p className="text-red-500 mb-4">{error}</p>} {/* Display error message */}
+            {error && <p className="text-red-500 mb-4">{error}</p>}
             {user ? (
                 <div>
-                    {/* User information */}
                     <div className="flex items-center mb-6">
-                        {/* User image on the left */}
                         <div className="mr-4">
                             {user.profilePictureUrl ? (
                                 <img
@@ -73,8 +94,6 @@ const UserPage = () => {
                                 <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-white">No Image</div>
                             )}
                         </div>
-
-                        {/* User information on the right */}
                         <div className="flex flex-col text-left">
                             <p><strong>Username:</strong> {user.username}</p>
                             <p><strong>Email:</strong> {user.email}</p>
@@ -83,19 +102,32 @@ const UserPage = () => {
                         </div>
                     </div>
 
-                    {/* Display Owned Books */}
                     <h3 className="text-2xl font-semibold mt-6 mb-4">Owned Books</h3>
                     {ownedBooks.length > 0 ? (
                         <ul>
-                            {ownedBooks.map((book,index) => (
+                            {ownedBooks.map((book, index) => (
                                 <li key={book.id} className="mb-4">
                                     <div className="flex flex-col">
-                                        <span className="text-2xl"><strong >Title:</strong> {book.title}</span>
+                                        <span className="text-2xl"><strong>Title:</strong> {book.title}</span>
                                         <span><strong>Author:</strong> {book.author}</span>
-                                        <span><strong>Publisher:</strong> {book.publisher}</span>
-                                        <span><strong>Year:</strong> {book.year}</span>
                                         <span><strong>ISBN:</strong> {book.isbn}</span>
                                         <span><strong>Status:</strong> {book.bookStatus}</span>
+                                        <div>
+                                            <h4 className="text-xl font-semibold mt-4">Transactions:</h4>
+                                            {book.transactions.length > 0 ? (
+                                                <ul>
+                                                    {book.transactions.map((transaction) => (
+                                                        <li key={transaction.id}>
+                                                            <span><strong>Status:</strong> {transaction.status}</span>
+                                                            <span><strong>Type:</strong> {transaction.type}</span>
+                                                            <span><strong>User:</strong> {transaction.user}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <p>No transactions found for this book.</p>
+                                            )}
+                                        </div>
                                     </div>
                                     {index < ownedBooks.length - 1 && <hr className="my-4 border-2" />}
                                 </li>
@@ -103,23 +135,6 @@ const UserPage = () => {
                         </ul>
                     ) : (
                         <p>No owned books found.</p>
-                    )}
-
-
-                    {/* Display Borrowed Books */}
-                    <h3 className="text-xl font-semibold mt-6 mb-4">Borrowed Books</h3>
-                    {borrowedBooks.length > 0 ? (
-                        <ul>
-                            {borrowedBooks.map((book) => (
-                                <li key={book.id} className="mb-4">
-                                    <div className="flex items-center">
-                                        <span>{book.title}</span>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p>No borrowed books found.</p>
                     )}
                 </div>
             ) : (
