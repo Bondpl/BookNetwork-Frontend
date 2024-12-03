@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { useAuth } from "../../AuthProvider";
+import {useRouter} from "@tanstack/react-router";
 
 const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const { isAuthenticated, login, logout } = useAuth();
+    const router = useRouter()
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -18,7 +20,7 @@ const LoginPage = () => {
             );
             console.log("Login successful:", response.data);
             setErrorMessage("");
-            login(); // Update authentication state
+            login();
         } catch (error) {
             console.error("Login error:", error);
             setErrorMessage(
@@ -40,6 +42,9 @@ const LoginPage = () => {
         }
     };
 
+    const handleRegister = () => {
+        router.navigate({ to: "/register" });
+    };
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
@@ -102,6 +107,12 @@ const LoginPage = () => {
                                 Login
                             </button>
                         </form>
+                        <button
+                            onClick={handleRegister}
+                            className="w-full px-4 py-2 mt-4 text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400"
+                        >
+                            Register
+                        </button>
                     </>
                 )}
             </div>
