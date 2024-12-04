@@ -97,7 +97,6 @@ const UserPage = () => {
                         <div className="flex flex-col text-left">
                             <p><strong>Username:</strong> {user.username}</p>
                             <p><strong>Email:</strong> {user.email}</p>
-                            <p><strong>Role:</strong> {user.role}</p>
                             <p><strong>Description:</strong> {user.description}</p>
                         </div>
                     </div>
