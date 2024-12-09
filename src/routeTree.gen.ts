@@ -14,7 +14,6 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as UserImport } from './routes/user'
 import { Route as RegisterImport } from './routes/register'
 import { Route as LoginImport } from './routes/login'
-import { Route as BorrowImport } from './routes/borrow'
 import { Route as BooksImport } from './routes/books'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
@@ -36,12 +35,6 @@ const RegisterRoute = RegisterImport.update({
 const LoginRoute = LoginImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const BorrowRoute = BorrowImport.update({
-  id: '/borrow',
-  path: '/borrow',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -88,13 +81,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BooksImport
       parentRoute: typeof rootRoute
     }
-    '/borrow': {
-      id: '/borrow'
-      path: '/borrow'
-      fullPath: '/borrow'
-      preLoaderRoute: typeof BorrowImport
-      parentRoute: typeof rootRoute
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -125,7 +111,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/books': typeof BooksRoute
-  '/borrow': typeof BorrowRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/user': typeof UserRoute
@@ -135,7 +120,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/books': typeof BooksRoute
-  '/borrow': typeof BorrowRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/user': typeof UserRoute
@@ -146,7 +130,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/books': typeof BooksRoute
-  '/borrow': typeof BorrowRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/user': typeof UserRoute
@@ -154,25 +137,10 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/about'
-    | '/books'
-    | '/borrow'
-    | '/login'
-    | '/register'
-    | '/user'
+  fullPaths: '/' | '/about' | '/books' | '/login' | '/register' | '/user'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/books' | '/borrow' | '/login' | '/register' | '/user'
-  id:
-    | '__root__'
-    | '/'
-    | '/about'
-    | '/books'
-    | '/borrow'
-    | '/login'
-    | '/register'
-    | '/user'
+  to: '/' | '/about' | '/books' | '/login' | '/register' | '/user'
+  id: '__root__' | '/' | '/about' | '/books' | '/login' | '/register' | '/user'
   fileRoutesById: FileRoutesById
 }
 
@@ -180,7 +148,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   BooksRoute: typeof BooksRoute
-  BorrowRoute: typeof BorrowRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   UserRoute: typeof UserRoute
@@ -190,7 +157,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   BooksRoute: BooksRoute,
-  BorrowRoute: BorrowRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   UserRoute: UserRoute,
@@ -209,7 +175,6 @@ export const routeTree = rootRoute
         "/",
         "/about",
         "/books",
-        "/borrow",
         "/login",
         "/register",
         "/user"
@@ -223,9 +188,6 @@ export const routeTree = rootRoute
     },
     "/books": {
       "filePath": "books.jsx"
-    },
-    "/borrow": {
-      "filePath": "borrow.jsx"
     },
     "/login": {
       "filePath": "login.jsx"

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 const UserPage = () => {
     const [user, setUser] = useState(null);
     const [ownedBooks, setOwnedBooks] = useState([]);
+    const [borrowedBooks, setBorrowedBooks] = useState([]);
     const [error, setError] = useState(null);
 
     const fetchAuthenticatedUser = async () => {
@@ -19,6 +20,7 @@ const UserPage = () => {
                 const data = await response.json();
                 setUser(data);
                 await fetchOwnedBooks();
+                await fetchBorrowedBooks();
             } else {
                 setError(`Error fetching user data: ${response.status}`);
             }
@@ -36,10 +38,8 @@ const UserPage = () => {
 
             if (response.ok) {
                 const books = await response.json();
-                console.log('Fetched books:', books); // Debugging line
                 const booksWithTransactions = await Promise.all(
                     books.map(async (book) => {
-                        console.log('Fetching transactions for book:', book.id); // Debugging line
                         const transactions = await fetchTransactionsOfBook(book.id);
                         return { ...book, transactions };
                     })
@@ -50,6 +50,24 @@ const UserPage = () => {
             }
         } catch (error) {
             setError(`Error fetching owned books: ${error.message}`);
+        }
+    };
+
+    const fetchBorrowedBooks = async () => {
+        try {
+            const response = await fetch('http://localhost:8080/books/borrowed', {
+                method: 'GET',
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                const books = await response.json();
+                setBorrowedBooks(books);
+            } else {
+                setError(`Failed to fetch borrowed books: ${response.status}`);
+            }
+        } catch (error) {
+            setError(`Error fetching borrowed books: ${error.message}`);
         }
     };
 
@@ -134,6 +152,24 @@ const UserPage = () => {
                         </ul>
                     ) : (
                         <p>No owned books found.</p>
+                    )}
+
+                    <h3 className="text-2xl font-semibold mt-6 mb-4">Borrowed Books</h3>
+                    {borrowedBooks.length > 0 ? (
+                        <ul>
+                            {borrowedBooks.map((book) => (
+                                <li key={book.id} className="mb-4">
+                                    <div className="flex flex-col">
+                                        <span className="text-2xl"><strong>Title:</strong> {book.title}</span>
+                                        <span><strong>Author:</strong> {book.author}</span>
+                                        <span><strong>ISBN:</strong> {book.isbn}</span>
+                                        <span><strong>Status:</strong> {book.bookStatus}</span>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No borrowed books found.</p>
                     )}
                 </div>
             ) : (
